@@ -4,24 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.study_viewmodel.databinding.FragmentABinding
-import com.google.android.material.textfield.TextInputEditText
 
 class FragmentA : Fragment() {
     private lateinit var viewModel: SharedViewModel
-    private lateinit var editText: TextInputEditText
+    private var _binding: FragmentABinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_a, container, false)
+        _binding = FragmentABinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        editText = view.findViewById(R.id.edit_text_from_fragment_1)
 
         viewModel.uiState.observe(viewLifecycleOwner, Observer { state ->
             when (state) {
@@ -29,8 +27,7 @@ class FragmentA : Fragment() {
                     // 로딩 상태 처리
                 }
                 is UiState.Success -> {
-                    editText.setText(state.data)
-
+                    binding.editTextFromFragment1.setText(state.data)
                 }
                 is UiState.Failure -> {
                     // 에러 상태 처리
@@ -38,11 +35,16 @@ class FragmentA : Fragment() {
             }
         })
 
-        view.findViewById<View>(R.id.send_button_fragment_1).setOnClickListener {
-            val text = editText.text.toString()
+        binding.sendButtonFragment1.setOnClickListener {
+            val text = binding.editTextFromFragment1.text.toString()
             viewModel.selectItem(text)
         }
 
-        return view
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
